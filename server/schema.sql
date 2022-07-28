@@ -11,7 +11,7 @@ CREATE TABLE
     id SERIAL PRIMARY KEY NOT NULL,
     product_id SERIAL NOT NULL,
     rating smallint,
-    date TIMESTAMPTZ NOT NULL,
+    -- date TIMESTAMPTZ NOT NULL,
     summary TEXT,
     body TEXT,
     recommend boolean,
@@ -22,6 +22,8 @@ CREATE TABLE
     helpfulness INTEGER
 );
 
+
+\copy reviews FROM 'server/data/reviewsTest.csv' DELIMITER ',' CSV HEADER;
 
 -- CREATE TABLE
 --   messages(
