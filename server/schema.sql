@@ -16,7 +16,8 @@ CREATE TABLE
     reviewer_name VARCHAR(255),
     reviewer_email VARCHAR(255),
     response TEXT,
-    helpfulness INTEGER
+    helpfulness INTEGER,
+    photos []
 );
 
 \copy reviews FROM 'server/data/reviews.csv' DELIMITER ',' CSV HEADER;
