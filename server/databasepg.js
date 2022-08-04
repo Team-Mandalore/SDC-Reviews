@@ -1,14 +1,15 @@
-const { Client } = require('pg');
+const { Pool } = require('pg');
+require("dotenv").config();
 
-const client = new Client({
-  host: "localhost",
-  user: "postgres",
-  password: "postgres",
-  port: 5432,
-  database: "reviewsservice"
+const pool = new Pool({
+  host: process.env.HOST,
+  user: process.env.PSQL_USER,
+  password: process.env.PASSWRD,
+  port: process.env.PORT,
+  database: process.env.DATABASE
 })
 
-client.connect()
+pool.connect()
   .then(() => {
     console.log('Successfully connected to DB!');
   })
@@ -17,10 +18,10 @@ client.connect()
   })
 
 
-// client.query('SELECT id as review_id, rating, summary, recommend, response, body, to_timestamp(date/1000) as date, reviewer_name, helpfulness FROM reviews WHERE product_id = ($1)', [productID])
+// pool.query('SELECT id as review_id, rating, summary, recommend, response, body, to_timestamp(date/1000) as date, reviewer_name, helpfulness FROM reviews WHERE product_id = ($1)', [productID])
 //   .then((reviewRes) => {
 //     reviewRes.rows.map((rev) => {
-//       client.query('SELECT id, url FROM review_photos WHERE review_id = ($1)', [rev.review_id])
+//       pool.query('SELECT id, url FROM review_photos WHERE review_id = ($1)', [rev.review_id])
 //         .then((revPhotos) => {
 //           rev['photos'] = revPhotos.rows;
 //           console.log('rev', rev);
@@ -34,8 +35,8 @@ client.connect()
 //     console.log(err);
 //   })
   // .finally(() => {
-  //   client.end();
+  //   pool.end();
   // })
 
 
-module.exports = client;
+module.exports = pool;

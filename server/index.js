@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const client = require('./databasepg.js');
+const pool = require('./databasepg.js');
 
 app.use(express.json()); //req.body
 
@@ -17,7 +17,7 @@ app.get('/reviews/:id/list', function (req, res) {
     results: []
   }
 
-  client.query('select json_agg(res) as results \
+  pool.query('select json_agg(res) as results \
     from( \
       select r.id as review_id, r.rating, r.summary, r.recommend, r.response, r.body, to_timestamp(r.date/1000) as date, r.reviewer_name, r.helpfulness, \
       (select json_agg(photos) \
@@ -40,29 +40,54 @@ app.get('/reviews/:id/meta', function (req, res) {
   const metaProdID = req.params.id;
   var metaData = {
     product_id: metaProdID,
-    ratings: {
-      '1': '',
-      '2': '',
-      '3': '',
-      '4': '',
-      '5': ''
-    },
-    recommended: {
-      'true': '',
-      'false': ''
-    },
-    characteristics: {
-
-    }
+    ratings: {},
+    recommended: {},
+    characteristics: {}
   }
 
-  client.query('SELECT rating, COUNT(rating) AS SELECT rating FROM reviews WHERE product_id = ($1) \
+  pool.query('SELECT rating, COUNT(rating) \
+  FROM reviews \
+  WHERE product_id = ($1) \
+  GROUP BY rating', [metaProdID])
+  .then((ratingCounts) => {
+    pool.query('SELECT recommend, COUNT(recommend) \
     FROM reviews \
     WHERE product_id = ($1) \
-    GROUP BY rating', [metaProdID])
-  .then((rat) => {
-    console.log(rat.rows);
-    res.send(rat.rows);
+    GROUP BY recommend', [metaProdID])
+    .then((recommendCount) => {
+
+
+      pool.query('SELECT json_object_agg(c.name, cr.value) FROM characteristics as c left join characteristic_reviews as cr on c.id=cr.characteristic_id WHERE c.product_id = ($1)', [metaProdID])
+
+
+      .then((chars) => {
+        console.log(chars.rows);
+        res.send(chars.rows);
+        // var ratings = {};
+        // for (var i = 0; i < ratingCounts.rows.length; i++) {
+        // ratings[ratingCounts.rows[i].rating] = ratingCounts.rows[i].count;
+        // }
+        // metaData.ratings = ratings;
+
+        // var recommends = {};
+        // for (var i = 0; i < recommendCount.rows.length; i++) {
+        //   recommends[recommendCount.rows[i].recommend] = recommendCount.rows[i].count;
+        // }
+        // metaData.recommended = recommends;
+
+        // console.log(metaData);
+        // res.send(metaData);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+  })
+  .catch((err) => {
+    console.log(err);
   })
 })
 
