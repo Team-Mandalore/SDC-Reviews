@@ -57,26 +57,33 @@ app.get('/reviews/:id/meta', function (req, res) {
     .then((recommendCount) => {
 
 
-      pool.query('SELECT json_object_agg(c.name, cr.value) FROM characteristics as c left join characteristic_reviews as cr on c.id=cr.characteristic_id WHERE c.product_id = ($1)', [metaProdID])
-
-
+      pool.query('SELECT c.name, cr.characteristic_id AS id, cr.value \
+      FROM characteristics AS c \
+      LEFT JOIN characteristic_reviews AS cr ON c.id = cr.characteristic_id \
+      WHERE c.product_id = ($1)', [metaProdID])
       .then((chars) => {
-        console.log(chars.rows);
-        res.send(chars.rows);
-        // var ratings = {};
-        // for (var i = 0; i < ratingCounts.rows.length; i++) {
-        // ratings[ratingCounts.rows[i].rating] = ratingCounts.rows[i].count;
-        // }
-        // metaData.ratings = ratings;
+        // console.log(chars.rows);
+        // res.send(chars.rows);
+        var ratings = {};
+        for (var i = 0; i < ratingCounts.rows.length; i++) {
+        ratings[ratingCounts.rows[i].rating] = ratingCounts.rows[i].count;
+        }
+        metaData.ratings = ratings;
 
-        // var recommends = {};
-        // for (var i = 0; i < recommendCount.rows.length; i++) {
-        //   recommends[recommendCount.rows[i].recommend] = recommendCount.rows[i].count;
-        // }
-        // metaData.recommended = recommends;
+        var recommends = {};
+        for (var i = 0; i < recommendCount.rows.length; i++) {
+          recommends[recommendCount.rows[i].recommend] = recommendCount.rows[i].count;
+        }
+        metaData.recommended = recommends;
 
-        // console.log(metaData);
-        // res.send(metaData);
+        var characs = {};
+        for (var i = 0; i < chars.rows.length; i++) {
+          characs[chars.rows[i].name] = {id: chars.rows[i].id, value: chars.rows[i].value}
+        }
+        metaData.characteristics = characs;
+
+        console.log(metaData);
+        res.send(metaData);
       })
       .catch((err) => {
         console.log(err);
