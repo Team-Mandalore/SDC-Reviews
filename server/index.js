@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const pool = require('./databasepg.js');
 
-app.use(express.json()); //req.body
+app.use(express.json());
 
 
 app.get('/reviews/:id/list', function (req, res) {
@@ -55,15 +55,11 @@ app.get('/reviews/:id/meta', function (req, res) {
     WHERE product_id = ($1) \
     GROUP BY recommend', [metaProdID])
     .then((recommendCount) => {
-
-
       pool.query('SELECT c.name, cr.characteristic_id AS id, cr.value \
       FROM characteristics AS c \
       LEFT JOIN characteristic_reviews AS cr ON c.id = cr.characteristic_id \
       WHERE c.product_id = ($1)', [metaProdID])
       .then((chars) => {
-        // console.log(chars.rows);
-        // res.send(chars.rows);
         var ratings = {};
         for (var i = 0; i < ratingCounts.rows.length; i++) {
         ratings[ratingCounts.rows[i].rating] = ratingCounts.rows[i].count;
@@ -96,6 +92,12 @@ app.get('/reviews/:id/meta', function (req, res) {
   .catch((err) => {
     console.log(err);
   })
+})
+
+
+app.post('/reviews/:id', function (req, res) {
+  const revProdID = req.params.id;
+  console.log(revProdID);
 })
 
 
