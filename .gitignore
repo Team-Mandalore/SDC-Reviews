@@ -5,3 +5,4 @@ server/data
 .env
 tests
 Mandalore-Atelier.pem
+PostgreSQL-Mandalore.pem
